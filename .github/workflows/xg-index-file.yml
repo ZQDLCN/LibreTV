@@ -26,7 +26,7 @@ jobs:
           done
           
           # 检查 JS 文件
-          for file in js/index-page.js js/douban.js js/player.js js/config.js; do
+          for file in js/index-page.js js/douban.js js/player.js js/config.js js/app.js; do
             if [ -f "$file" ]; then
               echo "$file 文件存在，继续处理"
             else
@@ -91,9 +91,18 @@ jobs:
         run: |
           sed -i '221s/LibreTV/中国电影ZGDY.CN/' js/player.js
       
+      - name: 修改 js/app.js 文件
+        if: "!contains(needs.*.outputs.*, 'skip_js_app.js')"
+        run: |
+          for line in 599 603 713 717; do
+            sed -i "${line}s/LibreTV/中国电影ZGDY.CN/" js/app.js
+          done
+      
       - name: 修改 js/config.js 文件
         if: "!contains(needs.*.outputs.*, 'skip_js_config.js')"
         run: |
+          sed -i '16s/LibreTV/中国电影/' js/config.js
+          sed -i '16s|https://libretv.is-an.org|https://www.zgdy.cn|' js/config.js
           # 修改第6行为指定内容
           sed -i '6c\if (localStorage.getItem('\''doubanEnabled'\'') === null) { localStorage.setItem('\''doubanEnabled'\'','\'true\''); }' js/config.js
       
@@ -103,7 +112,7 @@ jobs:
           git config user.email "github-actions@github.com"
           
           # 添加所有修改过的文件
-          for file in index.html watch.html about.html js/index-page.js js/douban.js js/player.js js/config.js; do
+          for file in index.html watch.html about.html js/index-page.js js/douban.js js/player.js js/config.js js/app.js; do
             if [ -f "$file" ]; then
               git add "$file"
             fi
