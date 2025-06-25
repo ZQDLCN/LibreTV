@@ -1,4 +1,4 @@
-name: Update LibreTV Index File
+name: Update Index File
 
 on:
   workflow_dispatch:  # 允许手动触发工作流
@@ -13,45 +13,56 @@ jobs:
         with:
           ref: main  # 要修改的分支名称
       
+      - name: 检查文件是否存在
+        run: |
+          if [ -f "index.html" ]; then
+            echo "文件存在，继续处理"
+          else
+            echo "错误：找不到 index.html 文件"
+            echo "当前目录内容："
+            ls -la
+            exit 1
+          fi
+      
       - name: 修改 index.html 文件
         run: |
           # 使用 sed 命令修改指定行
           # 第6行: 修改标题
-          sed -i '6s/LibreTV/中国电影ZGDY.CN/' LibreTV/index.html
+          sed -i '6s/LibreTV/中国电影ZGDY.CN/' index.html
           
           # 第7-9行: 修改元数据和logo
-          sed -i '7s/LibreTV/中国电影ZGDY.CN/' LibreTV/index.html
-          sed -i '8s/LibreTV/中国电影ZGDY.CN/' LibreTV/index.html
-          sed -i '9s/LibreTV/中国电影ZGDY.CN/' LibreTV/index.html
+          sed -i '7s/LibreTV/中国电影ZGDY.CN/' index.html
+          sed -i '8s/LibreTV/中国电影ZGDY.CN/' index.html
+          sed -i '9s/LibreTV/中国电影ZGDY.CN/' index.html
           
           # 第192行: 修改版权信息 (同时更新年份)
-          sed -i '192s/LibreTV/中国电影ZGDY.CN/' LibreTV/index.html
-          sed -i '192s/© 2023/© 2025/' LibreTV/index.html
+          sed -i '192s/LibreTV/中国电影ZGDY.CN/' index.html
+          sed -i '192s/2023/2025/' index.html
           
           # 第300-302行: 修改链接文本和URL
-          sed -i '300s/LibreTV/中国电影ZGDY.CN/' LibreTV/index.html
-          sed -i '300s|https://libretv.is-an.org|https://www.zgdy.cn|' LibreTV/index.html
-          sed -i '302s/LibreTV/中国电影ZGDY.CN/' LibreTV/index.html
-          sed -i '302s|https://libretv.is-an.org|https://www.zgdy.cn|' LibreTV/index.html
+          sed -i '300s/LibreTV/中国电影ZGDY.CN/' index.html
+          sed -i '300s|https://libretv.is-an.org|https://www.zgdy.cn|' index.html
+          sed -i '302s/LibreTV/中国电影ZGDY.CN/' index.html
+          sed -i '302s|https://libretv.is-an.org|https://www.zgdy.cn|' index.html
           
           # 第358-361行: 修改搜索结果页面标题
-          sed -i '358s/LibreTV/中国电影ZGDY.CN/' LibreTV/index.html
-          sed -i '361s/LibreTV/中国电影ZGDY.CN/' LibreTV/index.html
+          sed -i '358s/LibreTV/中国电影ZGDY.CN/' index.html
+          sed -i '361s/LibreTV/中国电影ZGDY.CN/' index.html
           
           # 第396行: 修改播放器标题
-          sed -i '396s/LibreTV/中国电影/' LibreTV/index.html
+          sed -i '396s/LibreTV/中国电影/' index.html
           
           # 第397-401行: 修改API和跟踪URL
-          sed -i '397s|https://libretv.is-an.org|https://www.zgdy.cn|' LibreTV/index.html
-          sed -i '401s|https://libretv.is-an.org|https://www.zgdy.cn|' LibreTV/index.html
+          sed -i '397s|https://libretv.is-an.org|https://www.zgdy.cn|' index.html
+          sed -i '401s|https://libretv.is-an.org|https://www.zgdy.cn|' index.html
           
           # 显示修改后的文件内容 (可选)
-          cat LibreTV/index.html
+          cat index.html
       
       - name: 提交修改
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git add LibreTV/index.html
-          git commit -m "Update LibreTV/index.html: Replace branding and URLs"
+          git add index.html
+          git commit -m "Update index.html: Replace branding and URLs"
           git push
