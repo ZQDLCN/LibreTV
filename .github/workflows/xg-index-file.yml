@@ -1,10 +1,10 @@
-name: Update Index File
+name: Update Web Files
 
 on:
   workflow_dispatch:  # 允许手动触发工作流
 
 jobs:
-  update-file:
+  update-files:
     runs-on: ubuntu-latest
     
     steps:
@@ -15,54 +15,84 @@ jobs:
       
       - name: 检查文件是否存在
         run: |
-          if [ -f "index.html" ]; then
-            echo "文件存在，继续处理"
-          else
-            echo "错误：找不到 index.html 文件"
-            echo "当前目录内容："
-            ls -la
-            exit 1
-          fi
+          # 检查 HTML 文件
+          for file in index.html watch.html; do
+            if [ -f "$file" ]; then
+              echo "$file 文件存在，继续处理"
+            else
+              echo "警告：找不到 $file 文件，将跳过对此文件的修改"
+              touch "skip_${file//\//_}"  # 使用下划线替换斜杠，避免文件名问题
+            fi
+          done
+          
+          # 检查 JS 文件
+          for file in js/index-page.js js/douban.js js/player.js; do
+            if [ -f "$file" ]; then
+              echo "$file 文件存在，继续处理"
+            else
+              echo "警告：找不到 $file 文件，将跳过对此文件的修改"
+              touch "skip_${file//\//_}"
+            fi
+          done
       
       - name: 修改 index.html 文件
+        if: "!contains(needs.*.outputs.*, 'skip_index.html')"
         run: |
           # 使用 sed 命令修改指定行
-          # 第6行: 修改标题
           sed -i '6s/LibreTV/中国电影ZGDY.CN/' index.html
-          
-          # 第7-9行: 修改元数据和logo
           sed -i '7s/LibreTV/中国电影ZGDY.CN/' index.html
           sed -i '8s/LibreTV/中国电影ZGDY.CN/' index.html
           sed -i '9s/LibreTV/中国电影ZGDY.CN/' index.html
-          
-          # 第192行: 修改版权信息 (同时更新年份)
           sed -i '192s/LibreTV/中国电影ZGDY.CN/' index.html
           sed -i '192s/2023/2025/' index.html
-          
-          # 第300-302行: 修改链接文本和URL
           sed -i '300s/LibreTV/中国电影ZGDY.CN/' index.html
           sed -i '300s|https://libretv.is-an.org|https://www.zgdy.cn|' index.html
           sed -i '302s/LibreTV/中国电影ZGDY.CN/' index.html
           sed -i '302s|https://libretv.is-an.org|https://www.zgdy.cn|' index.html
-          
-          # 第358-361行: 修改搜索结果页面标题
           sed -i '358s/LibreTV/中国电影ZGDY.CN/' index.html
           sed -i '361s/LibreTV/中国电影ZGDY.CN/' index.html
-          
-          # 第396行: 修改播放器标题
           sed -i '396s/LibreTV/中国电影/' index.html
-          
-          # 第397-401行: 修改API和跟踪URL
           sed -i '397s|https://libretv.is-an.org|https://www.zgdy.cn|' index.html
           sed -i '401s|https://libretv.is-an.org|https://www.zgdy.cn|' index.html
-          
-          # 显示修改后的文件内容 (可选)
-          cat index.html
+      
+      - name: 修改 watch.html 文件
+        if: "!contains(needs.*.outputs.*, 'skip_watch.html')"
+        run: |
+          sed -i '18s/LibreTV/中国电影ZGDY.CN/' watch.html
+      
+      - name: 修改 js/index-page.js 文件
+        if: "!contains(needs.*.outputs.*, 'skip_js_index-page.js')"
+        run: |
+          sed -i '48s/LibreTV/中国电影ZGDY.CN/' js/index-page.js
+          sed -i '72s/LibreTV/中国电影ZGDY.CN/' js/index-page.js
+      
+      - name: 修改 js/douban.js 文件
+        if: "!contains(needs.*.outputs.*, 'skip_js_douban.js')"
+        run: |
+          sed -i '240s/LibreTV/中国电影ZGDY.CN/' js/douban.js
+          sed -i '244s/LibreTV/中国电影ZGDY.CN/' js/douban.js
+      
+      - name: 修改 js/player.js 文件
+        if: "!contains(needs.*.outputs.*, 'skip_js_player.js')"
+        run: |
+          sed -i '221s/LibreTV/中国电影ZGDY.CN/' js/player.js
       
       - name: 提交修改
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git add index.html
-          git commit -m "Update index.html: Replace branding and URLs"
-          git push
+          
+          # 添加所有修改过的文件
+          for file in index.html watch.html js/index-page.js js/douban.js js/player.js; do
+            if [ -f "$file" ]; then
+              git add "$file"
+            fi
+          done
+          
+          # 只有当有修改时才提交
+          if ! git diff --staged --quiet; then
+            git commit -m "Update web files: Replace LibreTV with 中国电影ZGDY.CN"
+            git push
+          else
+            echo "没有检测到文件修改，跳过提交"
+          fi
