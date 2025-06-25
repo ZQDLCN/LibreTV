@@ -26,7 +26,7 @@ jobs:
           done
           
           # 检查 JS 文件
-          for file in js/index-page.js js/douban.js js/player.js; do
+          for file in js/index-page.js js/douban.js js/player.js js/config.js; do
             if [ -f "$file" ]; then
               echo "$file 文件存在，继续处理"
             else
@@ -77,13 +77,19 @@ jobs:
         run: |
           sed -i '221s/LibreTV/中国电影ZGDY.CN/' js/player.js
       
+      - name: 修改 js/config.js 文件
+        if: "!contains(needs.*.outputs.*, 'skip_js_config.js')"
+        run: |
+          # 修改第6行为指定内容
+          sed -i '6c\if (localStorage.getItem('\''doubanEnabled'\'') === null) { localStorage.setItem('\''doubanEnabled'\'','\'true\''); }' js/config.js
+      
       - name: 提交修改
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           
           # 添加所有修改过的文件
-          for file in index.html watch.html js/index-page.js js/douban.js js/player.js; do
+          for file in index.html watch.html js/index-page.js js/douban.js js/player.js js/config.js; do
             if [ -f "$file" ]; then
               git add "$file"
             fi
@@ -91,7 +97,7 @@ jobs:
           
           # 只有当有修改时才提交
           if ! git diff --staged --quiet; then
-            git commit -m "Update web files: Replace LibreTV with 中国电影ZGDY.CN"
+            git commit -m "Update web files: Replace branding and update config"
             git push
           else
             echo "没有检测到文件修改，跳过提交"
