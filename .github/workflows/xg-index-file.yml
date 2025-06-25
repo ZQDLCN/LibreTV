@@ -16,7 +16,7 @@ jobs:
       - name: 检查文件是否存在
         run: |
           # 检查 HTML 文件
-          for file in index.html watch.html; do
+          for file in index.html watch.html about.html; do
             if [ -f "$file" ]; then
               echo "$file 文件存在，继续处理"
             else
@@ -60,6 +60,20 @@ jobs:
         run: |
           sed -i '18s/LibreTV/中国电影ZGDY.CN/' watch.html
       
+      - name: 修改 about.html 文件
+        if: "!contains(needs.*.outputs.*, 'skip_about.html')"
+        run: |
+          # 修改指定行
+          sed -i '6s/LibreTV/中国电影ZGDY.CN/' about.html
+          sed -i '23s/LibreTV/中国电影ZGDY.CN/' about.html
+          sed -i '27s/LibreTV/中国电影ZGDY.CN/' about.html
+          sed -i '45s/LibreTV/中国电影ZGDY.CN/' about.html
+          sed -i '49s/LibreTV/中国电影ZGDY.CN/' about.html
+          sed -i '75s/LibreTV/中国电影ZGDY.CN/' about.html
+          sed -i '105s/LibreTV/中国电影ZGDY.CN/' about.html
+          sed -i '151s/LibreTV/中国电影ZGDY.CN/' about.html
+          sed -i '153s/LibreTV/中国电影ZGDY.CN/' about.html
+      
       - name: 修改 js/index-page.js 文件
         if: "!contains(needs.*.outputs.*, 'skip_js_index-page.js')"
         run: |
@@ -89,7 +103,7 @@ jobs:
           git config user.email "github-actions@github.com"
           
           # 添加所有修改过的文件
-          for file in index.html watch.html js/index-page.js js/douban.js js/player.js js/config.js; do
+          for file in index.html watch.html about.html js/index-page.js js/douban.js js/player.js js/config.js; do
             if [ -f "$file" ]; then
               git add "$file"
             fi
