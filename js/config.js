@@ -3,7 +3,7 @@ const PROXY_URL = '/proxy/';    // 适用于 Cloudflare, Netlify (带重写), Ve
 // const HOPLAYER_URL = 'https://hoplayer.com/index.html';
 const SEARCH_HISTORY_KEY = 'videoSearchHistory';
 const MAX_HISTORY_ITEMS = 5;
-
+if (localStorage.getItem('doubanEnabled') === null) { localStorage.setItem('doubanEnabled','true'); }
 // 密码保护配置
 const PASSWORD_CONFIG = {
     localStorageKey: 'passwordVerified',  // 存储验证状态的键名
